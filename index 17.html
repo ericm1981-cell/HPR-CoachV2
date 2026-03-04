@@ -1,0 +1,1335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#0b2e4a"/>
+<title>HPR Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0c10;--panel:#13151c;--panel2:#0f1117;--ink:#e8edf5;--muted:#a8b3c7;--line:#242a37;
+  --blue:#3aa0ff;--blue2:#0b2e4a;--orange:#ff8a1f;--good:#22c55e;--bad:#ef4444;--warn:#f59e0b;
+  --shadow:0 10px 30px rgba(0,0,0,.35);--r:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0b0c10 0%,#07080c 100%);color:var(--ink);
+  font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+.wrap{max-width:1120px;margin:0 auto;padding:12px 12px 26px}
+
+/* Header */
+.header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,rgba(11,46,74,.98),rgba(11,46,74,.86));
+  border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px 10px 12px 10px;backdrop-filter:blur(10px)}
+.hTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.brand .t{font-family:"Syne";font-weight:900;font-size:18px;white-space:nowrap}
+.brand .s{font-size:12px;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{font-family:"DM Mono",ui-monospace;color:rgba(255,255,255,.88);font-size:12px;
+  padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.18)}
+.pill strong{font-family:"DM Sans";color:#fff}
+
+/* Line buttons */
+.lineBar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.lbtn{border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.18);color:#fff;
+  padding:10px 12px;border-radius:999px;font-weight:900;cursor:pointer}
+.lbtn.active{outline:2px solid rgba(58,160,255,.65);border-color:rgba(58,160,255,.65)}
+
+/* Tabs */
+.tabBar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tab{border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.18);color:#fff;
+  padding:10px 12px;border-radius:999px;font-weight:900;cursor:pointer}
+.tab.active{outline:2px solid rgba(255,138,31,.65);border-color:rgba(255,138,31,.65)}
+
+/* Cards */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,rgba(19,21,28,.92),rgba(15,17,23,.92));
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;}
+h3{margin:0 0 10px 0;font-family:"Syne";font-size:14px;letter-spacing:.2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:160px;display:flex;flex-direction:column;gap:6px}
+label{font-size:12px;color:var(--muted)}
+input,select,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:rgba(9,10,14,.7);
+  color:var(--ink);outline:none;font-size:14px}
+textarea{min-height:82px;resize:vertical}
+.btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+button.action{border:1px solid var(--line);background:linear-gradient(180deg,rgba(27,34,48,.9),rgba(14,18,26,.9));
+  color:var(--ink);padding:10px 12px;border-radius:14px;font-weight:900;cursor:pointer}
+button.primary{border-color:rgba(58,160,255,.55);background:linear-gradient(180deg,rgba(58,160,255,.28),rgba(58,160,255,.10))}
+button.orange{border-color:rgba(255,138,31,.6);background:linear-gradient(180deg,rgba(255,138,31,.26),rgba(255,138,31,.10))}
+button.good{border-color:rgba(34,197,94,.55);background:linear-gradient(180deg,rgba(34,197,94,.22),rgba(34,197,94,.08))}
+.kpi{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.k{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(27,34,48,.55);
+  font-size:12px;color:var(--muted);font-family:"DM Mono",ui-monospace}
+.k strong{color:var(--ink);font-family:"DM Sans"}
+.k.good{border-color:rgba(34,197,94,.45)}
+.k.bad{border-color:rgba(239,68,68,.45)}
+.k.warn{border-color:rgba(245,158,11,.45)}
+.k.blue{border-color:rgba(58,160,255,.45)}
+.k.orange{border-color:rgba(255,138,31,.5)}
+.teams{white-space:pre-wrap;font-family:"DM Mono";font-size:12px;background:rgba(9,10,14,.55);
+  border:1px dashed rgba(168,179,199,.35);border-radius:14px;padding:10px;color:var(--ink)}
+.note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.35}
+.hide{display:none !important}
+
+/* Plan table */
+.tableWrap{margin-top:10px;border:1px solid var(--line);border-radius:14px;overflow:auto;background:rgba(9,10,14,.35)}
+table{width:100%;border-collapse:collapse;min-width:960px}
+thead th{position:sticky;top:0;background:#0b2e4a;color:#fff;font-size:12px;text-align:left;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.08)}
+tbody td{font-size:12px;padding:9px 8px;border-top:1px solid rgba(255,255,255,.06);vertical-align:top}
+tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
+/* Highlight rows with required > 0 */
+tbody tr.has-work{background:rgba(58,160,255,.06)}
+tbody tr.has-work:nth-child(odd){background:rgba(58,160,255,.10)}
+/* Highlight high work content (large Required) */
+tbody tr.high-work td{color:#ffd6a8}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-weight:900;font-size:11px;
+  border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.18);color:#fff}
+.badge.temp{border-color:rgba(255,138,31,.65);color:#ffd6a8}
+.badge.done{border-color:rgba(34,197,94,.45);color:#86efac}
+.badge.partial{border-color:rgba(245,158,11,.45);color:#fcd34d}
+.badge.open{border-color:rgba(239,68,68,.45);color:#fca5a5}
+.debug{margin-top:10px;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,138,31,.35);
+  background:rgba(255,138,31,.08);color:#ffd6a8;font-family:"DM Mono";font-size:12px;white-space:pre-wrap}
+.req-cell{font-weight:700}
+.req-cell.zero{color:var(--muted)}
+.req-cell.nonzero{color:#3aa0ff}
+
+/* Delivery due rows */
+tbody tr.delivery-due td:first-child{ border-left:3px solid #fcd34d; }
+tbody tr.delivery-due{ background:rgba(252,211,77,.05) }
+tbody tr.delivery-due:nth-child(odd){ background:rgba(252,211,77,.09) }
+/* High work rows */
+tbody tr.high-work td{ color:#ffd6a8 }
+tbody tr.has-work{ background:rgba(58,160,255,.06) }
+tbody tr.has-work:nth-child(odd){ background:rgba(58,160,255,.10) }
+/* SRV excluded from timing */
+tbody tr.srv-excluded{ opacity:.55 }
+/* Inline flag badges */
+.flag{display:inline-flex;align-items:center;margin-left:6px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap}
+.hw-flag{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.5);color:#fca5a5}
+.deliv-flag{background:rgba(252,211,77,.15);border:1px solid rgba(252,211,77,.55);color:#fcd34d}
+.excl-flag{background:rgba(168,179,199,.12);border:1px solid rgba(168,179,199,.3);color:#a8b3c7;font-style:italic}
+@media print{
+  body{background:#fff;color:#000}
+  .header,.noPrint{display:none !important}
+  .card{box-shadow:none;border:1px solid #ccc;background:#fff}
+  .tableWrap{border:1px solid #ccc}
+  table{min-width:0}
+  thead th{background:#0b2e4a !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+.quickBtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.quickBtns .mini{padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:var(--ink);font-weight:700;cursor:pointer}
+.quickBtns .mini:active{transform:scale(.98)}
+
+/* Hour Status Banner */
+.status-banner{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-radius:16px;padding:18px 14px 14px;margin-top:8px;
+  border:2px solid rgba(255,255,255,.12);transition:background .3s,border-color .3s;min-height:100px}
+.status-idle{background:rgba(36,42,55,.6);border-color:rgba(255,255,255,.12)}
+.status-ahead{background:linear-gradient(135deg,rgba(34,197,94,.22),rgba(34,197,94,.08));
+  border-color:rgba(34,197,94,.7);box-shadow:0 0 24px rgba(34,197,94,.18)}
+.status-behind{background:linear-gradient(135deg,rgba(239,68,68,.26),rgba(239,68,68,.08));
+  border-color:rgba(239,68,68,.7);box-shadow:0 0 24px rgba(239,68,68,.2)}
+.status-offshift{background:rgba(36,42,55,.4);border-color:rgba(168,179,199,.3)}
+.status-word{font-family:"Syne";font-weight:900;font-size:42px;letter-spacing:2px;
+  line-height:1;text-transform:uppercase}
+.status-idle .status-word{color:var(--muted)}
+.status-ahead .status-word{color:#4ade80;text-shadow:0 0 18px rgba(74,222,128,.5)}
+.status-behind .status-word{color:#f87171;text-shadow:0 0 18px rgba(248,113,113,.5)}
+.status-offshift .status-word{color:var(--muted);font-size:28px}
+.status-sub{font-size:13px;margin-top:8px;color:rgba(255,255,255,.7);
+  font-family:"DM Mono",ui-monospace;text-align:center}
+.status-ahead .status-sub{color:rgba(134,239,172,.85)}
+.status-behind .status-sub{color:rgba(252,165,165,.85)}
+
+/* SWIP section */
+.swip-header{font-family:"Syne";font-size:11px;font-weight:900;letter-spacing:.8px;
+  color:var(--orange);text-transform:uppercase;margin-top:16px;margin-bottom:6px;
+  padding-bottom:4px;border-bottom:1px solid rgba(255,138,31,.3)}
+.glass-toggle{display:flex;gap:6px;margin-top:4px}
+.gtBtn{flex:1;padding:9px 6px;border-radius:10px;font-weight:900;font-size:13px;cursor:pointer;
+  border:1px solid var(--line);background:rgba(9,10,14,.5);color:var(--muted);transition:all .15s}
+.gtBtn.active[data-val="Y"]{border-color:rgba(34,197,94,.7);background:rgba(34,197,94,.2);color:#4ade80}
+.gtBtn.active[data-val="N"]{border-color:rgba(239,68,68,.7);background:rgba(239,68,68,.2);color:#f87171}
+.dual-banner{background:rgba(255,138,31,.1);border:1px solid rgba(255,138,31,.4);border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:rgba(255,255,255,.85);line-height:1.5}
+.dual-badge{background:var(--orange);color:#fff;font-weight:900;font-size:11px;letter-spacing:.5px;padding:2px 8px;border-radius:999px;margin-right:8px;text-transform:uppercase}
+.tomorrow-divider td{background:rgba(58,160,255,.18)!important;color:#7dd3fc!important;
+  font-weight:900;font-size:12px;letter-spacing:.5px;text-align:center;
+  border-top:2px solid #3aa0ff!important;border-bottom:2px solid #3aa0ff!important}
+.night-target-row td{background:rgba(255,138,31,.15)!important;color:var(--orange)!important;font-weight:900;font-size:12px;letter-spacing:.4px;text-align:center;border-top:2px solid var(--orange)!important;border-bottom:2px solid var(--orange)!important}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="hTop">
+      <div class="brand">
+        <div class="t">HPR Command Center</div>
+        <div class="s">Run the Hour • Respond to Red • Own Tomorrow • Assumptions</div>
+      </div>
+      <div class="pills">
+        <div class="pill"><strong>Now</strong> <span id="clock">--:--</span></div>
+        <div class="pill"><strong>Line</strong> <span id="lineLabel">—</span></div>
+        <div class="pill"><strong>Cap</strong> <span id="capLabel">—</span></div>
+        <div class="pill"><strong>Takt</strong> <span id="taktLabel">—</span></div>
+      </div>
+    </div>
+
+    <div class="lineBar" id="lineBar"></div>
+
+    <div class="tabBar noPrint" id="tabBar">
+      <button class="tab active" type="button" data-tab="hour">Run the Hour</button>
+      <button class="tab" type="button" data-tab="red">Respond to Red</button>
+      <button class="tab" type="button" data-tab="plan">Own Tomorrow</button>
+      <button class="tab" type="button" data-tab="assump">Assumptions</button>
+    </div>
+  </div>
+
+  <!-- Run the Hour -->
+  <section id="tab-hour" class="tabPanel">
+    <div class="grid">
+      <div class="card">
+        <h3>Hourly Check (this hour only)</h3>
+        <div class="row">
+          <div class="field">
+            <label>Shift</label>
+            <select id="hourShift">
+              <option value="day">Day Shift (6:00–2:30)</option>
+              <option value="px2">PX/SL 2nd Shift (3:30–12:00)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Actual units this hour</label>
+            <input id="hourActual" type="number" min="0" step="1" placeholder="e.g., 42"/>
+          </div>
+        </div>
+
+        <div class="swip-header">SWIP Levels</div>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:100px">
+            <label>Frame SWIP</label>
+            <input id="swipFrame" type="number" min="0" step="1" placeholder="0"/>
+          </div>
+          <div class="field" style="flex:1;min-width:100px">
+            <label>Sash SWIP</label>
+            <input id="swipSash" type="number" min="0" step="1" placeholder="0"/>
+          </div>
+          <div class="field" style="flex:1.3;min-width:140px">
+            <label>Glass — enough for next hour?</label>
+            <div class="glass-toggle" id="glassToggle">
+              <button type="button" class="gtBtn active" data-val="Y">✓ YES</button>
+              <button type="button" class="gtBtn" data-val="N">✗ NO</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button class="action primary" id="hourCalc" type="button">Update Hour</button>
+          <button class="action good" id="hourCopy" type="button">Copy Update</button>
+          <button class="action orange" type="button" onclick="window.print()">Print</button>
+        </div>
+        <div class="note">SWIP and glass status included in copied update. Gap is negative when behind pace.</div>
+      </div>
+
+      <div class="card">
+        <h3>Hour Status</h3>
+        <div id="h_statusBanner" class="status-banner status-idle">
+          <div class="status-word" id="h_statusWord">—</div>
+          <div class="status-sub" id="h_statusSub">Enter actual units and click Update Hour</div>
+        </div>
+        <div class="kpi" style="margin-top:12px">
+          <div class="k blue"><strong>Min into shift</strong> <span id="h_min">—</span></div>
+          <div class="k"><strong>Expected now</strong> <span id="h_exp">—</span></div>
+          <div class="k"><strong>Actual</strong> <span id="h_act">—</span></div>
+          <div class="k" id="h_gapK"><strong>Gap</strong> <span id="h_gap">—</span></div>
+          <div class="k orange"><strong>Need to finish hour</strong> <span id="h_need">—</span></div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="swip-header">Hourly Update Preview</div>
+        <div class="teams" id="hourTeamsBox" style="margin-top:8px">Enter actuals and click Update Hour.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Respond to Red -->
+  <section id="tab-red" class="tabPanel hide">
+    <div class="grid">
+      <div class="card">
+        <h3>Day Status Inputs (for recovery decisions)</h3>
+        <div class="row">
+          <div class="field">
+            <label>Shift</label>
+            <select id="redShift">
+              <option value="day">Day Shift (6:00–2:30)</option>
+              <option value="px2">PX/SL 2nd Shift (3:30–12:00)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Today's scheduled units (full day)</label>
+            <input id="redSched" type="number" min="0" step="1" placeholder="e.g., 195"/>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Carryover (built first)</label>
+            <input id="redCarry" type="number" min="0" step="1" value="0"/>
+          </div>
+          <div class="field">
+            <label>Produced to now (FULL DAY cumulative)</label>
+            <input id="redProd" type="number" min="0" step="1" placeholder="e.g., 112"/>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Last hour actual (units)</label>
+            <input id="redLastHr" type="number" min="0" step="1" placeholder="e.g., 41"/>
+          </div>
+          <div class="field">
+            <label>Recovery (next 60 min) — Action</label>
+            <input id="recAction" type="text" placeholder="e.g., Send 10-min helper"/>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:260px">
+            <label>Details (short + factual)</label>
+            <textarea id="recDetails" placeholder="Constraint + what changed + next 60 min move"></textarea>
+          </div>
+          <div class="field">
+            <label>Commitment (when is your next update?)</label>
+            <input id="recCommit" type="text" placeholder="e.g., Next check-in at top of next hour — 11:00 AM"/>
+            <div class="quickBtns">
+              <button type="button" class="mini" id="btnCommit10">+10 min</button>
+              <button type="button" class="mini" id="btnCommit20">+20 min</button>
+              <button type="button" class="mini" id="btnCommit30">+30 min</button>
+              <button type="button" class="mini" id="btnCommitTop">Top of next hour</button>
+            </div>
+          </div>
+        </div>
+        <div class="btnRow">
+          <button class="action primary" id="redCalc" type="button">Update Day + Recovery</button>
+          <button class="action good" id="redCopy" type="button">Copy Teams Text</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recovery Dashboard</h3>
+        <div class="kpi">
+          <div class="k"><strong>Day HPR (cap)</strong> <span id="r_hpr">—</span></div>
+          <div class="k" id="r_gapK"><strong>Gap to target now</strong> <span id="r_gap">—</span></div>
+          <div class="k orange"><strong>Need/hr — 100% HPR</strong> <span id="r_needHpr">—</span></div>
+          <div class="k orange"><strong>Need/hr — 100% Schedule</strong> <span id="r_needSched">—</span></div>
+          <div class="k"><strong>Last hour lost</strong> <span id="r_lost">—</span></div>
+          <div class="k"><strong>Remaining demand</strong> <span id="r_rem">—</span></div>
+          <div class="k"><strong>Projected finish</strong> <span id="r_finish">—</span></div>
+          <div class="k" id="r_otK"><strong>OT needed</strong> <span id="r_ot">—</span></div>
+        </div>
+        <div style="height:10px"></div>
+        <h3>Teams Preview</h3>
+        <div class="teams" id="teamsBox">Enter inputs and click "Update Day + Recovery".</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Own Tomorrow -->
+  <section id="tab-plan" class="tabPanel hide">
+
+    <div id="pxslDualBanner" class="dual-banner" style="display:none">
+      <span class="dual-badge">PX/SL</span>
+      Load today&#39;s schedule (if incomplete) + tomorrow&#39;s schedule for a full sequenced plan.
+      Night shift target marker (50%) appears automatically in the combined table.
+    </div>
+
+    <div class="card">
+      <h3 id="schedATitle">End-of-Shift Plan</h3>
+
+      <div class="row">
+        <div class="field">
+          <label>Today&#39;s schedule (.txt) &mdash; optional if complete</label>
+          <input id="planFile" type="file" accept=".txt,.text"/>
+        </div>
+        <div class="field">
+          <label>Tomorrow&#39;s schedule (.txt)</label>
+          <input id="planFileB" type="file" accept=".txt,.text"/>
+        </div>
+        <div class="field" style="flex:0.5;min-width:110px">
+          <label>Carryover override</label>
+          <input id="planCarry" type="number" min="0" step="1" value="0"/>
+        </div>
+      </div>
+
+      <div class="btnRow">
+        <button class="action primary" id="planBuild" type="button">Build Plan</button>
+        <button class="action good"    id="planCopyTeams" type="button">Copy End-of-Shift Update</button>
+        <button class="action orange"  type="button" onclick="window.print()">Print Plan</button>
+      </div>
+
+      <!-- Summary KPIs -->
+      <div class="kpi">
+        <div class="k blue"><strong>Today file</strong> <span id="p_file">&mdash;</span></div>
+        <div class="k blue"><strong>Tomorrow file</strong> <span id="pb_file">&mdash;</span></div>
+        <div class="k"><strong>Carryover</strong> <span id="p_carry">&mdash;</span></div>
+        <div class="k blue"><strong>Today Required</strong> <span id="p_totalReq">&mdash;</span></div>
+        <div class="k blue"><strong>Tomorrow Required</strong> <span id="pb_totalReq">&mdash;</span></div>
+        <div class="k blue"><strong>Total Build</strong> <span id="p_totalBuild">&mdash;</span></div>
+        <div class="k orange"><strong>Projected Completion</strong> <span id="p_finish">&mdash;</span></div>
+        <div class="k" id="p_delivK" style="display:none"><strong>Delivery Qty</strong> <span id="p_delivCount">&mdash;</span></div>
+        <div class="k" id="p_delivFinishK" style="display:none"><strong>Delivery Complete By</strong> <span id="p_delivFinish">&mdash;</span></div>
+        <div class="k warn"><strong>High Work Batches</strong> <span id="p_highWork">&mdash;</span></div>
+        <div class="k orange" id="p_nightTargetK" style="display:none"><strong>Night Target (50%)</strong> <span id="pb_target">&mdash;</span></div>
+      </div>
+
+      <!-- Combined table -->
+      <div class="tableWrap">
+        <table>
+          <thead><tr>
+            <th>Batch</th><th>Route(s)</th>
+            <th title="Final / Total">Made/Total</th>
+            <th title="Units still needed">Required</th>
+            <th>Mull</th><th>Temp</th><th>Description</th><th>Est Finish</th>
+          </tr></thead>
+          <tbody id="planBody">
+            <tr><td colspan="8" style="color:var(--muted)">Upload tomorrow&#39;s schedule (required) and optionally today&#39;s, then click Build Plan.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="debug" id="planDebug" style="display:none"></div>
+
+      <!-- Teams preview -->
+      <div class="swip-header" style="margin-top:16px">End-of-Shift Update Preview</div>
+      <div class="teams" id="planTeamsBox" style="margin-top:8px">Build plan first, then copy update.</div>
+    </div>
+
+    <div class="note" style="margin-top:10px">
+      <strong>Made/Total</strong> = Final &divide; Total. &nbsp;<strong>Required</strong> = Total &minus; Final. &nbsp;
+      <strong>&#x26a1; HW</strong> = High work content. &nbsp;
+      <strong>&#x1F69A; Ship</strong> = Next-day delivery batch. &nbsp;
+      <span id="nightTargetNote" style="display:none"><strong>&mdash;&mdash; Night Target &mdash;&mdash;</strong> = 50% of tomorrow&#39;s Required. Night shift builds above this line. &nbsp;</span>
+      Route prefix: 1xx=Mon 2xx=Tue 3xx=Wed 4xx=Thu 5xx=Fri.
+    </div>
+
+  </section>
+
+  <!-- Assumptions -->
+  <section id="tab-assump" class="tabPanel hide">
+    <div class="card">
+      <h3>Assumptions (transparency)</h3>
+      <div class="kpi">
+        <div class="k blue"><strong>Day Shift</strong> 6:00–2:30</div>
+        <div class="k blue"><strong>PX/SL 2nd Shift</strong> 3:30–12:00</div>
+        <div class="k"><strong>Capacity</strong> <span id="a_cap">—</span></div>
+        <div class="k orange"><strong>Takt (cap)</strong> <span id="a_takt">—</span></div>
+        <div class="k"><strong>Breaks</strong> <span id="a_breaks">—</span></div>
+      </div>
+      <div class="note" id="a_rules"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  // ===== CONFIG =====
+  // breakWindows: [{s, e}] in minutes-from-midnight. Used to exclude non-production time from all math.
+  const LINES = [
+    {key:"LINE1", label:"Line 1", cap:260,
+     breakWindows:[{s:9*60, e:9*60+15},{s:11*60+45, e:12*60+15}],
+     breaks:"9:00–9:15 • 11:45–12:15", notes:"Capacity baseline uses 455 production minutes (510 min shift minus 55 min breaks)."},
+    {key:"LINE2", label:"Line 2", cap:385,
+     breakWindows:[{s:9*60+10, e:9*60+25},{s:12*60+15, e:12*60+45}],
+     breaks:"9:10–9:25 • 12:15–12:45", notes:"Capacity baseline uses 455 production minutes (510 min shift minus 55 min breaks)."},
+    {key:"LINE3", label:"Line 3", cap:195,
+     breakWindows:[{s:9*60+10, e:9*60+25},{s:12*60+15, e:12*60+45}],
+     breaks:"9:10–9:25 • 12:15–12:45", notes:"Capacity baseline uses 455 production minutes (510 min shift minus 55 min breaks)."},
+    {key:"PXSL",  label:"PX/SL", cap:115,
+     breakWindows:[{s:9*60, e:9*60+15},{s:11*60+45, e:12*60+15}],
+     breaks:"9:00–9:15 • 11:45–12:15", notes:"2nd shift exists (3:30–12:00). Day HPR is still full-day cumulative."},
+    {key:"CASE",  label:"Casement", cap:108,
+     breakWindows:[{s:8*60+45, e:9*60},{s:11*60+15, e:11*60+45}],
+     breaks:"8:45–9:00 • 11:15–11:45", notes:"Capacity baseline uses 455 production minutes (510 min shift minus 55 min breaks)."},
+  ];
+
+  // Map app line key -> section header text in schedule file
+  const SCHEDULE_SECTION = {
+    "LINE1": "LINE1",
+    "LINE2": "LINE2",
+    "LINE3": "LINE3",
+    "PXSL":  "PXSL",
+    "CASE":  "CASE"
+  };
+
+  const SHIFT_WINDOWS = {
+    day: { startH:6,  startM:0,  endH:14, endM:30 },
+    px2: { startH:15, startM:30, endH:24, endM:0  }
+  };
+
+  let state = { lineKey:"LINE1", tab:"hour", scheduleParsed:null };
+
+  // ===== HELPERS =====
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function toHM(d){
+    let h=d.getHours(), m=d.getMinutes();
+    const ap = h>=12?"PM":"AM";
+    h = h%12; if(h===0) h=12;
+    return `${h}:${pad2(m)} ${ap}`;
+  }
+  function taktMin(cap){ return 455/cap; }
+  function capPerMin(line){ return line.cap/455; }
+  function hourTargetFull(line){ return line.cap/8; }
+  function getLine(){ return LINES.find(x=>x.key===state.lineKey)||LINES[0]; }
+
+  function clockTick(){ document.getElementById("clock").textContent = toHM(new Date()); }
+  setInterval(clockTick,1000); clockTick();
+
+  // ===== BREAK-AWARE PRODUCTION TIME HELPERS =====
+  // Returns true if the given minute-of-day falls inside a break window for this line
+  function inBreak(line, minOfDay){
+    return (line.breakWindows||[]).some(b => minOfDay >= b.s && minOfDay < b.e);
+  }
+
+  // Returns total production minutes between fromMin and toMin (both minutes-from-midnight),
+  // excluding any break windows defined on the line. Clamps to shift bounds externally.
+  function productionMinutes(line, fromMin, toMin){
+    if(toMin <= fromMin) return 0;
+    let prod = toMin - fromMin;
+    for(const b of (line.breakWindows||[])){
+      // overlap of [fromMin,toMin) with [b.s, b.e)
+      const overlapStart = Math.max(fromMin, b.s);
+      const overlapEnd   = Math.min(toMin,   b.e);
+      if(overlapEnd > overlapStart) prod -= (overlapEnd - overlapStart);
+    }
+    return Math.max(0, prod);
+  }
+
+  // Given a line and a start time (minutes-from-midnight), returns the minute-of-day
+  // that is reached after 'prodMinutes' of production time (skipping breaks).
+  function addProductionMinutes(line, startMin, prodMins){
+    let cur = startMin;
+    let remaining = prodMins;
+    const MAX = 24*60;
+    while(remaining > 0 && cur < MAX){
+      // Skip if currently in a break
+      const bk = (line.breakWindows||[]).find(b => cur >= b.s && cur < b.e);
+      if(bk){ cur = bk.e; continue; }
+      // Find next break start
+      const nextBk = (line.breakWindows||[]).filter(b => b.s > cur).sort((a,b)=>a.s-b.s)[0];
+      const runUntil = nextBk ? Math.min(nextBk.s, MAX) : MAX;
+      const canRun = runUntil - cur;
+      if(canRun <= 0){ cur = runUntil; continue; }
+      if(remaining <= canRun){ cur += remaining; remaining = 0; }
+      else { remaining -= canRun; cur = runUntil; }
+    }
+    return cur;
+  }
+
+  function showDebug(msg){
+    const el=document.getElementById("planDebug");
+    if(!msg){ el.style.display="none"; el.textContent=""; return; }
+    el.style.display="block";
+    el.textContent=msg;
+  }
+
+  // ===== LINE BUTTONS =====
+  function buildLineButtons(){
+    const host=document.getElementById("lineBar");
+    host.innerHTML="";
+    LINES.forEach(l=>{
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="lbtn"+(l.key===state.lineKey?" active":"");
+      b.textContent=l.label;
+      b.addEventListener("click",()=>{
+        state.lineKey=l.key;
+        document.querySelectorAll(".lbtn").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        syncHeader();
+        if(state.scheduleParsedB) renderUnifiedPlan();
+      });
+      host.appendChild(b);
+    });
+  }
+
+  function syncHeader(){
+    const l=getLine();
+    document.getElementById("lineLabel").textContent = l.label;
+    document.getElementById("capLabel").textContent  = `${l.cap}/shift`;
+    document.getElementById("taktLabel").textContent = `${taktMin(l.cap).toFixed(2)} min`;
+    document.getElementById("a_cap").textContent     = `${l.cap}/shift`;
+    document.getElementById("a_takt").textContent    = `${taktMin(l.cap).toFixed(2)} min/unit`;
+    document.getElementById("a_breaks").textContent  = l.breaks;
+    document.getElementById("a_rules").textContent   = l.notes+" Breaks are displayed for awareness; planning ETA is capacity-based (no break subtraction).";
+    // Show PX/SL dual-schedule banner
+    const isPXSL = state.lineKey === "PXSL";
+    const banner = document.getElementById("pxslDualBanner");
+    if(banner) banner.style.display = isPXSL ? "" : "none";
+    const nightNote = document.getElementById("nightTargetNote");
+    if(nightNote) nightNote.style.display = isPXSL ? "" : "none";
+    const titleEl = document.getElementById("schedATitle");
+    if(titleEl) titleEl.textContent = isPXSL
+      ? "Today’s Schedule (A) — Day Shift Finishes"
+      : "End-of-Shift Plan";
+    const nightTargetK = document.getElementById("p_nightTargetK");
+    if(nightTargetK) nightTargetK.style.display = isPXSL ? "" : "none";
+    // Re-render plan on line switch if data is loaded
+    if(state.scheduleParsedB) renderUnifiedPlan();
+  }
+
+  // ===== TABS =====
+  function setTab(tab){
+    state.tab=tab;
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
+    document.querySelectorAll(".tabPanel").forEach(p=>p.classList.add("hide"));
+    const el=document.getElementById("tab-"+tab);
+    if(el) el.classList.remove("hide");
+  }
+  document.getElementById("tabBar").addEventListener("click",(e)=>{
+    const btn=e.target.closest(".tab");
+    if(btn) setTab(btn.dataset.tab);
+  });
+
+  // ===== RUN THE HOUR (break-aware) =====
+  document.getElementById("hourCalc").addEventListener("click",()=>{
+    const line=getLine();
+    const shiftKey=document.getElementById("hourShift").value;
+    const actual=parseFloat(document.getElementById("hourActual").value||"0");
+    const sw=SHIFT_WINDOWS[shiftKey]||SHIFT_WINDOWS.day;
+
+    const now=new Date();
+    const nowMin=now.getHours()*60+now.getMinutes();
+    const shiftStart=sw.startH*60+sw.startM;
+    const shiftEnd=sw.endH*60+sw.endM;
+
+    const inShift=(nowMin>=shiftStart && nowMin<=shiftEnd);
+    const onBreak = inShift && inBreak(line, nowMin);
+
+    // Current clock hour window
+    const hourStart=Math.floor(nowMin/60)*60;
+    const hourEnd=hourStart+60;
+
+    // Production minutes (break-subtracted) within this hour, clamped to shift
+    const hStart = Math.max(hourStart, shiftStart);
+    const hEnd   = Math.min(hourEnd,   shiftEnd);
+    const prodSoFar = inShift ? productionMinutes(line, hStart, Math.min(nowMin, hEnd)) : 0;
+    const prodFull  = inShift ? productionMinutes(line, hStart, hEnd) : 0;
+
+    const upm=capPerMin(line);
+    const expectedNow=upm*prodSoFar;
+    const hourTarget =upm*prodFull;
+    const gap=actual-expectedNow;
+    const need=Math.max(0,hourTarget-actual);
+
+    document.getElementById("h_min").textContent  = inShift ? `${Math.round(prodSoFar)} prod min` : "OFF SHIFT";
+    document.getElementById("h_exp").textContent  = inShift ? expectedNow.toFixed(1) : "—";
+    document.getElementById("h_act").textContent  = inShift ? actual.toFixed(1) : "—";
+    document.getElementById("h_gap").textContent  = inShift ? ((gap>=0?"+":"")+gap.toFixed(1)) : "—";
+    document.getElementById("h_need").textContent = inShift ? `+${need.toFixed(1)}` : "—";
+
+    const gapK=document.getElementById("h_gapK");
+    gapK.classList.remove("good","bad","warn");
+    if(inShift&&!onBreak) gapK.classList.add(gap>=0?"good":(gap>-5?"warn":"bad"));
+
+    // Drive status banner
+    const banner=document.getElementById("h_statusBanner");
+    const wordEl=document.getElementById("h_statusWord");
+    const subEl=document.getElementById("h_statusSub");
+    banner.classList.remove("status-idle","status-ahead","status-behind","status-offshift");
+
+    if(!inShift){
+      banner.classList.add("status-offshift");
+      wordEl.textContent="OFF SHIFT";
+      subEl.textContent="Outside planned production hours — "+(shiftKey==="px2"?"PX/SL 2nd":"Day")+" Shift";
+    } else if(onBreak){
+      banner.classList.add("status-offshift");
+      wordEl.textContent="ON BREAK";
+      const bk=(line.breakWindows||[]).find(b=>nowMin>=b.s&&nowMin<b.e);
+      const resumeH=bk?Math.floor(bk.e/60):0, resumeM=bk?bk.e%60:0;
+      subEl.textContent="Production resumes at "+resumeH+":"+pad2(resumeM)+" — no units expected during break";
+    } else if(gap>=0){
+      banner.classList.add("status-ahead");
+      wordEl.textContent="AHEAD";
+      subEl.textContent="+"+gap.toFixed(1)+" units above pace  •  maintain "+(upm*60).toFixed(1)+"/hr";
+    } else {
+      banner.classList.add("status-behind");
+      wordEl.textContent="BEHIND";
+      subEl.textContent=gap.toFixed(1)+" units below pace  •  need +"+need.toFixed(1)+" to close the hour";
+    }
+  });
+
+  // ===== GLASS TOGGLE =====
+  let glassVal = "Y";
+  document.getElementById("glassToggle").addEventListener("click", e => {
+    const btn = e.target.closest(".gtBtn");
+    if(!btn) return;
+    glassVal = btn.dataset.val;
+    document.querySelectorAll("#glassToggle .gtBtn").forEach(b => {
+      b.classList.toggle("active", b === btn);
+    });
+  });
+
+  // Build hourly Teams text (HPR + SWIP combined)
+  function buildHourText(){
+    const line     = getLine();
+    const shiftKey = document.getElementById("hourShift").value;
+    const shiftLbl = shiftKey==="px2" ? "PX/SL 2nd Shift" : "Day Shift";
+    const frame    = document.getElementById("swipFrame").value.trim() || "—";
+    const sash     = document.getElementById("swipSash").value.trim()  || "—";
+    const glass    = glassVal==="Y" ? "YES — sufficient for next hour" : "NO — risk of miss";
+    const status   = document.getElementById("h_statusWord").textContent;
+    const hMin     = document.getElementById("h_min").textContent;
+    const hExp     = document.getElementById("h_exp").textContent;
+    const hAct     = document.getElementById("h_act").textContent;
+    const hGap     = document.getElementById("h_gap").textContent;
+    const hNeed    = document.getElementById("h_need").textContent;
+    return (
+"Hourly Update — " + line.label + " (" + shiftLbl + ") — " + toHM(new Date()) + "\n" +
+"\n" +
+"━━ HPR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+"Status:             " + status + "\n" +
+"Production min:     " + hMin + "\n" +
+"Expected now:       " + hExp + "\n" +
+"Actual:             " + hAct + "\n" +
+"Gap:                " + hGap + "\n" +
+"Need to finish hr:  " + hNeed + "\n" +
+"\n" +
+"━━ SWIP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+"Frame SWIP:         " + frame + "\n" +
+"Sash SWIP:          " + sash + "\n" +
+"Glass (next hour):  " + glass
+    );
+  }
+
+  // Update preview box after hourCalc fires
+  const _origHourCalc = document.getElementById("hourCalc");
+  _origHourCalc.addEventListener("click", () => {
+    setTimeout(() => {
+      const box = document.getElementById("hourTeamsBox");
+      if(box) box.textContent = buildHourText();
+    }, 30);
+  });
+
+  document.getElementById("hourCopy").addEventListener("click", async () => {
+    const text = buildHourText();
+    document.getElementById("hourTeamsBox").textContent = text;
+    try{ await navigator.clipboard.writeText(text); }
+    catch(e){
+      const ta=document.createElement("textarea");
+      ta.value=text; ta.style.position="fixed"; ta.style.left="-9999px";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try{ document.execCommand("copy"); }catch(_){}
+      document.body.removeChild(ta);
+    }
+  });
+
+  // ===== RESPOND TO RED =====
+  function minutesWorkedSinceShiftStart(shiftKey){
+    const sw=SHIFT_WINDOWS[shiftKey]||SHIFT_WINDOWS.day;
+    const now=new Date();
+    const nowMin=now.getHours()*60+now.getMinutes();
+    const start=sw.startH*60+sw.startM;
+    return Math.max(0, nowMin-start);
+  }
+
+  async function copyToClipboard(text){
+    try{ await navigator.clipboard.writeText(text); return true; }
+    catch(e){
+      const ta=document.createElement("textarea");
+      ta.value=text; ta.style.position="fixed"; ta.style.left="-9999px";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try{ document.execCommand("copy"); }catch(_){}
+      document.body.removeChild(ta); return true;
+    }
+  }
+
+  document.getElementById("redCalc").addEventListener("click",()=>{
+    const line=getLine();
+    const shiftKey=document.getElementById("redShift").value;
+    const sw=SHIFT_WINDOWS[shiftKey]||SHIFT_WINDOWS.day;
+    const sched=parseFloat(document.getElementById("redSched").value||"0");
+    const carry=parseFloat(document.getElementById("redCarry").value||"0");
+    const prod=parseFloat(document.getElementById("redProd").value||"0");
+    const lastHr=parseFloat(document.getElementById("redLastHr").value||"0");
+    const demand=sched+carry;
+
+    // Break-aware: only count production minutes since shift start
+    const nowMin2=new Date().getHours()*60+new Date().getMinutes();
+    const shiftStartMin2=sw.startH*60+sw.startM;
+    const shiftEndMin2=sw.endH*60+sw.endM;
+    const workedMin=productionMinutes(line, shiftStartMin2, Math.min(nowMin2, shiftEndMin2));
+    const expToNow=capPerMin(line)*workedMin;
+    const dayHPR=expToNow>0?(prod/expToNow):0;
+    const gapNow=prod-expToNow;
+    const rem=Math.max(0,demand-prod);
+
+    const now=new Date();
+    const shiftEnd=new Date(now);
+    shiftEnd.setHours(sw.endH, sw.endM, 0, 0);
+    let remMin=(shiftEnd-now)/60000;
+    if(remMin<0) remMin=0;
+
+    // Break-aware remaining production minutes
+    const nowMinR=now.getHours()*60+now.getMinutes();
+    const remProdMin=productionMinutes(line, nowMinR, sw.endH*60+sw.endM);
+
+    // Need/hr — 100% SCHEDULE: pace needed to finish remaining demand in remaining PRODUCTION time
+    const needSchedPerHr = remProdMin>0 ? (rem/remProdMin)*60 : (rem>0?Infinity:0);
+
+    // Need/hr — 100% HPR: pace needed to hit full capacity in remaining PRODUCTION time
+    const capRemaining = line.cap - prod;
+    const needHprPerHr = remProdMin>0 ? (capRemaining/remProdMin)*60 : 0;
+
+    const hrTarget=hourTargetFull(line);
+    const lost=lastHr-hrTarget;
+    const rate=workedMin>0?(prod/workedMin):0;
+    const addMin=rate>0?(rem/rate):null;
+
+    let finishText="—", ot="NO";
+    if(rem===0){ finishText="Done"; ot="NO"; }
+    else if(addMin&&isFinite(addMin)){
+      const finish=new Date(now.getTime()+addMin*60000);
+      finishText=toHM(finish);
+      ot=finish>shiftEnd?"YES":"NO";
+    } else if(rem>0){
+      finishText="—"; ot="YES";
+    }
+
+    const fmt1=(n,forceSign=true)=>(forceSign?(n>=0?"+":"")+n.toFixed(1):n.toFixed(1));
+
+    document.getElementById("r_hpr").textContent=(dayHPR*100).toFixed(1)+"%";
+    document.getElementById("r_gap").textContent=fmt1(gapNow);
+    const rGapK=document.getElementById("r_gapK");
+    rGapK.classList.remove("good","bad","warn");
+    rGapK.classList.add(gapNow>=0?"good":(gapNow>-10?"warn":"bad"));
+
+    document.getElementById("r_needHpr").textContent=isFinite(needHprPerHr)?fmt1(needHprPerHr)+"/hr":"—";
+    document.getElementById("r_needSched").textContent=isFinite(needSchedPerHr)?fmt1(needSchedPerHr)+"/hr":"—";
+
+    document.getElementById("r_lost").textContent=fmt1(lost);
+    document.getElementById("r_rem").textContent=rem.toFixed(0);
+    document.getElementById("r_finish").textContent=finishText;
+    document.getElementById("r_ot").textContent=ot;
+    const otK=document.getElementById("r_otK");
+    otK.classList.remove("good","bad","warn");
+    otK.classList.add(ot==="NO"?"good":"bad");
+
+    const action=(document.getElementById("recAction").value||"").trim()||"—";
+    const details=(document.getElementById("recDetails").value||"").trim()||"—";
+    const commit=(document.getElementById("recCommit").value||"").trim()||"Next check-in at top of next hour — specify time";
+    const shiftLabel=shiftKey==="px2"?"PX/SL 2nd Shift":"Day Shift";
+
+    const teams=
+`HPR Update — ${line.label} (${shiftLabel}) — ${toHM(new Date())}
+
+Day HPR: ${(dayHPR*100).toFixed(1)}%
+Gap to target now: ${fmt1(gapNow)} units
+Need/hr — 100% HPR: ${isFinite(needHprPerHr)?fmt1(needHprPerHr)+"/hr":"—"}
+Need/hr — 100% Schedule: ${isFinite(needSchedPerHr)?fmt1(needSchedPerHr)+"/hr":"—"}
+Remaining on schedule: ${rem.toFixed(0)}
+
+Projected finish: ${finishText}
+OT needed: ${ot}
+
+Recovery (next 60 min): ${action}
+Details: ${details}
+Commitment: ${commit}`;
+
+    document.getElementById("teamsBox").textContent=teams;
+  });
+
+  document.getElementById("redCopy").addEventListener("click",async()=>{
+    const t=document.getElementById("teamsBox").textContent||"";
+    await copyToClipboard(t);
+  });
+
+  // Quick commitment buttons
+  function fmtTime(d){
+    let h=d.getHours(), m=d.getMinutes();
+    const ap=h>=12?"PM":"AM";
+    h=h%12; if(h===0) h=12;
+    return `${h}:${pad2(m)} ${ap}`;
+  }
+  function setCommitText(txt){ const el=document.getElementById("recCommit"); if(el) el.value=txt; }
+  function addMinutes(min){ const d=new Date(); d.setMinutes(d.getMinutes()+min); setCommitText(`Next check-in at ${fmtTime(d)}`); }
+  function topNextHour(){ const d=new Date(); d.setHours(d.getHours()+1,0,0,0); setCommitText(`Next check-in at ${fmtTime(d)} (top of hour)`); }
+  document.getElementById("btnCommit10").addEventListener("click",()=>addMinutes(10));
+  document.getElementById("btnCommit20").addEventListener("click",()=>addMinutes(20));
+  document.getElementById("btnCommit30").addEventListener("click",()=>addMinutes(30));
+  document.getElementById("btnCommitTop").addEventListener("click",topNextHour);
+
+  // ===== OWN TOMORROW: SCHEDULE PARSER =====
+  // Schedule format (tab-delimited):
+  // Batch | Mull | Temp | Description | Routes | GS | G | F | S | Qty(x/y) | Final(z) | Status
+  //
+  // Display:  Made/Total = z / y
+  // Required: y - z
+  //
+  // The parser needs to find the x/y token and the standalone numeric z token that follows.
+
+  const SECTION_MAP = {
+    "LINE1":"LINE1","LINE 1":"LINE1",
+    "LINE2":"LINE2","LINE 2":"LINE2",
+    "LINE3":"LINE3","LINE 3":"LINE3",
+    "PX/SL":"PXSL","PXSL":"PXSL","PX/SLIDER":"PXSL","PX / SLIDER":"PXSL","PX /SLIDER":"PXSL",
+    "CASEMENT":"CASE","CASE":"CASE"
+  };
+  const IGNORE_SECTIONS=new Set(["GEO","SERVICE","PATIODR","PATIO","TEMPER","MULLING"]);
+
+  function normKey(s){ return String(s||"").toUpperCase().replace(/\s+/g," ").trim().replace(/\s*\/\s*/g,"/"); }
+
+  function parseScheduleText(raw){
+    const lines=(raw||"").replace(/\u00A0/g," ").split(/\r?\n/);
+    const rows=[];
+    let cur=null;
+
+    for(const line of lines){
+      if(!line||!line.trim()) continue;
+
+      // Split: prefer tabs, fall back to 2+ spaces
+      let parts=line.split(/\t+/);
+      if(parts.length<3) parts=line.split(/ {2,}/);
+
+      const firstRaw=(parts[0]||"").trim();
+      const firstNorm=normKey(firstRaw);
+
+      // ---- Section header detection ----
+      // Check exact match
+      if(SECTION_MAP[firstNorm]){
+        cur=SECTION_MAP[firstNorm];
+        continue;
+      }
+      // PX header might split oddly
+      if(firstNorm.startsWith("PX")&&(firstNorm.includes("SLIDER")||firstNorm.includes("SL"))){
+        cur="PXSL"; continue;
+      }
+      // Line N header split oddly (e.g. "LINE" + "1" in separate parts)
+      if(firstNorm==="LINE"&&parts[1]){
+        const num=(parts[1]||"").trim();
+        if(num==="1"){ cur="LINE1"; continue; }
+        if(num==="2"){ cur="LINE2"; continue; }
+        if(num==="3"){ cur="LINE3"; continue; }
+      }
+      // Ignore sections
+      if(IGNORE_SECTIONS.has(firstNorm)){ cur=firstNorm; continue; }
+
+      if(!cur||IGNORE_SECTIONS.has(cur)) continue;
+
+      // Skip header rows
+      if(firstNorm.includes("VINYL SCHEDULE")||firstNorm.includes("PRODUCTION DATE")) continue;
+      if(firstNorm==="BATCH"||firstNorm==="LINE1"||firstNorm==="LINE2"||firstNorm==="LINE3") continue;
+
+      const batch=firstRaw;
+      if(!batch||batch.length<3) continue;
+
+      // ---- Extract fields from parts ----
+      // Schedule column order (tab-delimited):
+      // [0]Batch [1]Mull [2]Temp [3]Description [4]Routes [5]GS [6]G [7]F [8]S [9]Qty(x/y) [10]Final(z) [11]Status([-])
+      //
+      // STRATEGY: Scan from the RIGHT — the structure at the end of each row is always:
+      //   ... | x/y | z | [-]
+      // So the LAST token is [-] (status), the token before that is Final(z), the token before that is Qty(x/y).
+      // This is immune to column shifts caused by empty GS/G/F/S fields.
+
+      // Collect non-empty trimmed tokens for right-anchored parsing
+      const tokens = parts.map(p=>(p||"").trim()).filter(p=>p.length>0);
+
+      // Strip trailing [-] status token if present
+      const lastToken = tokens[tokens.length-1]||"";
+      const workTokens = lastToken.startsWith("[-") ? tokens.slice(0,-1) : tokens;
+
+      // Find x/y scanning from the right (last occurrence wins — there's only one)
+      let qtyIdx=-1;
+      for(let i=workTokens.length-1;i>=0;i--){
+        if(/^\d+\s*\/\s*\d+$/.test(workTokens[i])){ qtyIdx=i; break; }
+      }
+
+      // Final(z) is the token immediately AFTER x/y in workTokens
+      const qtyRaw = qtyIdx>=0 ? workTokens[qtyIdx] : "";
+      const finalRaw = (qtyIdx>=0 && qtyIdx+1<workTokens.length) ? workTokens[qtyIdx+1] : "";
+
+      // Parse x/y
+      const qtyMatch = qtyRaw.match(/^(\d+)\s*\/\s*(\d+)$/);
+      const qtyX = qtyMatch ? parseInt(qtyMatch[1],10) : 0;  // units done in production session
+      const qtyY = qtyMatch ? parseInt(qtyMatch[2],10) : 0;  // total units in batch
+
+      // Final(z) must be a standalone integer (not another x/y or [-])
+      const finalZ = /^\d+$/.test(finalRaw) ? parseInt(finalRaw,10) : 0;
+
+      // Display: Made/Total = z / y  |  Required = y - z
+      const total   = qtyY;
+      const made    = finalZ;
+      const required = Math.max(0, total - made);
+
+      // Named columns (positions 1-4 are stable regardless of GS/G/F/S collapsing)
+      const mullRaw  = (parts[1]||"").trim();
+      const tempRaw  = (parts[2]||"").trim();
+      const descRaw  = (parts[3]||"").trim();
+      const routesRaw= (parts[4]||"").trim();
+
+      // Clean up route string
+      const routes=routesRaw.replace(/;/g,", ").replace(/^,\s*/,"").trim();
+
+      // Mull: only if purely numeric
+      const mull=/^\d+$/.test(mullRaw)?parseInt(mullRaw,10):"";
+      const temp=tempRaw||"";
+      const desc=descRaw||"";
+
+      // Skip if no useful data
+      if(!total&&!made&&!routes&&!desc) continue;
+
+      rows.push({ line:cur, batch, routes, made, total, required, mull, temp, desc });
+    }
+
+    return rows;
+  }
+
+  // ===== DELIVERY DAY LOGIC =====
+  // Routes: 1xx=Mon 2xx=Tue 3xx=Wed 4xx=Thu 5xx=Fri
+  // "Today" = day app is used. We auto-detect from system date.
+  // Routes: 1xx=Mon 2xx=Tue 3xx=Wed 4xx=Thu 5xx=Fri
+  // We always build TOMORROW's delivery today, so target prefix = today + 1
+  const PREFIX_LABEL = {1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri"};
+
+  function todayDeliveryPrefix(){
+    const d = new Date().getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+    // Mon(1)->2xx, Tue(2)->3xx, Wed(3)->4xx, Thu(4)->5xx, Fri(5)->no next day
+    const map = {1:2, 2:3, 3:4, 4:5};
+    return map[d] || null; // null on Fri/Sat/Sun (no next-day production target)
+  }
+
+  // Given a route string like "RT310, RT370, RT412" → extract all route numeric prefixes (hundreds digit)
+  function routePrefixes(routeStr){
+    const prefixes = new Set();
+    const matches = routeStr.match(/\d{3,}/g)||[];
+    for(const m of matches){
+      const p = Math.floor(parseInt(m,10)/100);
+      if(p>=1&&p<=5) prefixes.add(p);
+    }
+    return prefixes;
+  }
+
+  function isDeliveryDueToday(routeStr){
+    const today = todayDeliveryPrefix();
+    if(!today) return false;
+    return routePrefixes(routeStr).has(today);
+  }
+
+  // ===== HIGH WORK CONTENT FLAG =====
+  // Rules per line section:
+  //   LINE1:    batch prefix HOP
+  //   LINE2:    batch prefix SH or FF
+  //   CASE:     batch prefix WW
+  //   Others:   none
+  // Substring match anywhere in batch ID (not prefix-only)
+  const HIGH_WORK_PATTERNS = {
+    LINE1: [/HOP/i],
+    LINE2: [/SH/i, /FF/i],
+    LINE3: [/SH/i, /FF/i],
+    CASE:  [/WW/i],
+  };
+
+  function isHighWorkBatch(secKey, batchId){
+    const patterns = HIGH_WORK_PATTERNS[secKey]||[];
+    return patterns.some(p=>p.test(batchId));
+  }
+
+  // ===== SRV INCLUSION RULES =====
+  // Include SRV rows in ETA math for: LINE1 and CASE
+  // Exclude SRV from: LINE2, LINE3, PXSL (and always exclude if desc contains "screen")
+  const SRV_INCLUDE_SECTIONS = new Set(["LINE1","CASE"]);
+
+  function isSrvRow(batchId){ return /SRV/i.test(batchId); }
+
+  function includeSrvInTiming(secKey, desc){
+    if(!SRV_INCLUDE_SECTIONS.has(secKey)) return false;
+    if(/screen/i.test(desc)) return false;
+    return true;
+  }
+
+  // ===== RENDER PLAN TABLE =====
+  // Break-aware ETA: given cumulative production minutes from shift start, returns clock time
+  function timeOfDayFromProdMin(line, prodMinsFromStart, shiftStartMin){
+    const arrivalMin = addProductionMinutes(line, shiftStartMin, prodMinsFromStart);
+    const h = Math.floor(arrivalMin/60) % 24;
+    const m = arrivalMin % 60;
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return toHM(d);
+  }
+
+
+  // ===== OWN TOMORROW — unified plan (today optional + tomorrow) =====
+
+  // Use document-level delegation so file inputs work even inside hidden tab panels
+  document.addEventListener("change", async e => {
+    // Today's schedule (File A)
+    if(e.target.id === "planFile"){
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      document.getElementById("p_file").textContent = f.name;
+      const rows = parseScheduleText(await f.text());
+      const sections = {};
+      for(const r of rows) (sections[r.line]||=[]).push(r);
+      state.scheduleParsed = { rows, sections };
+      const secKey = SCHEDULE_SECTION[state.lineKey]||state.lineKey;
+      const openReq = (sections[secKey]||[]).filter(r=>r.required>0).reduce((s,r)=>s+r.required,0);
+      state.scheduleAOpenRequired = openReq;
+      if(openReq > 0) document.getElementById("planCarry").value = openReq;
+    }
+
+    // Tomorrow's schedule (File B)
+    if(e.target.id === "planFileB"){
+      try {
+        const f = e.target.files && e.target.files[0];
+        if(!f) return;
+        document.getElementById("pb_file").textContent = f.name;
+        const text = await f.text();
+        const rows = parseScheduleText(text);
+        const sections = {};
+        for(const r of rows) (sections[r.line]||=[]).push(r);
+        state.scheduleParsedB = { rows, sections };
+        const secs = Object.keys(sections);
+        showDebug("Tomorrow file ready: " + f.name + "\nSections: " + (secs.join(", ")||"NONE") + " | Rows: " + rows.length);
+      } catch(err) {
+        showDebug("Error reading tomorrow file: " + err.message);
+        state.scheduleParsedB = null;
+      }
+    }
+  });
+
+  // Build Plan — unified render
+  document.getElementById("planBuild").addEventListener("click", () => {
+    if(!state.scheduleParsedB){
+      showDebug("Tomorrow’s schedule is required. Upload the .txt file for tomorrow first.");
+      return;
+    }
+    const _dbgKey = SCHEDULE_SECTION[state.lineKey]||state.lineKey;
+    const _dbgSecs = Object.keys(state.scheduleParsedB.sections);
+    const _dbgMatch = (state.scheduleParsedB.sections[_dbgKey]||[]).length;
+    showDebug("Building plan...\nLine: " + state.lineKey + " | Section key: " + _dbgKey + "\nSections in file: " + (_dbgSecs.join(", ")||"NONE") + "\nMatched rows for [" + _dbgKey + "]: " + _dbgMatch);
+    renderUnifiedPlan();
+  });
+
+  // Copy end-of-shift Teams update
+  document.getElementById("planCopyTeams").addEventListener("click", async () => {
+    const text = buildPlanTeamsText();
+    document.getElementById("planTeamsBox").textContent = text;
+    try { await navigator.clipboard.writeText(text); }
+    catch(e) {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position="fixed"; ta.style.left="-9999px";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand("copy"); } catch(_) {}
+      document.body.removeChild(ta);
+    }
+  });
+
+  function updateScheduleBCarry(){
+    const openReq = state.scheduleAOpenRequired || 0;
+    document.getElementById("p_carry").textContent = openReq > 0
+      ? openReq + " units (from today’s open Required)"
+      : "0";
+    if(openReq > 0) document.getElementById("planCarry").value = openReq;
+  }
+
+  function renderUnifiedPlan(){
+    const line   = getLine();
+    const secKey = SCHEDULE_SECTION[state.lineKey]||state.lineKey;
+    const isPXSL = state.lineKey === "PXSL";
+    const upm    = capPerMin(line);
+    const SHIFT_START_MIN = 6*60; // day shift default; night shift 15:30 for PXSL if needed
+
+    // Today's open rows (optional)
+    const todayRows = state.scheduleParsed
+      ? (state.scheduleParsed.sections[secKey]||[]).filter(r=>r.required>0)
+      : [];
+
+    // Manual carryover override (if no today file or override typed)
+    const manualCarry = parseInt(document.getElementById("planCarry").value||"0");
+    const carryUnits  = todayRows.length > 0
+      ? todayRows.reduce((s,r)=>s+r.required,0)
+      : manualCarry;
+
+    // Tomorrow's rows — show ALL rows including zero-required for diagnosis
+    const _tmrwAll = (state.scheduleParsedB.sections[secKey]||[]);
+    const _sample = _tmrwAll.slice(0,5).map(r=>
+      r.batch + " | made=" + r.made + " total=" + r.total + " req=" + r.required + " routes=" + JSON.stringify(r.routes)
+    ).join("\n");
+    showDebug((document.getElementById("planDebug").textContent||"") + "\n\nSample rows (all, no filter):\n" + (_sample||"NONE"));
+    // Temporarily show all rows (including required=0) for diagnosis
+    const tmrwRows = _tmrwAll;
+
+    // Totals
+    const todayRequired = todayRows.reduce((s,r)=>s+r.required,0);
+    const tmrwRequired  = tmrwRows.reduce((s,r)=>s+r.required,0);
+    const totalBuild    = carryUnits + tmrwRequired;
+
+    // Night shift 50% target (PX/SL only)
+    const halfTarget = isPXSL ? Math.ceil(tmrwRequired / 2) : null;
+
+    // ETA accumulators
+    let cum = 0, hwCount = 0, delivCount = 0;
+    let delivFinishCum = null;
+    const todayPfx = todayDeliveryPrefix();
+    const tbody = document.getElementById("planBody");
+    tbody.innerHTML = "";
+
+    function buildRow(r, isTodaySection){
+      const req = r.required;
+      cum += upm > 0 ? req / upm : 0;
+      const eta = timeOfDayFromProdMin(line, cum, SHIFT_START_MIN);
+
+      const hwFlag    = isHighWorkBatch(secKey, r.batch);
+      const delivFlag = todayPfx && isDeliveryDueToday(r.routes);
+      if(hwFlag)    hwCount++;
+      if(delivFlag && req > 0){
+        delivCount += req;
+        delivFinishCum = cum; // track last delivery ETA
+      }
+
+      const tr = document.createElement("tr");
+      if(hwFlag)    tr.classList.add("high-work");
+      if(delivFlag) tr.classList.add("delivery-due");
+
+      const batchCell = r.batch
+        + (hwFlag    ? " <span class='flag hw-flag'>&#x26a1; HW</span>" : "")
+        + (delivFlag ? " <span class='flag deliv-flag'>&#x1F69A; Ship</span>" : "");
+
+      const routeDisplay = (r.routes||[]).map(rt => {
+        const num = parseInt(((rt.match(/[0-9]+/)||[])[0]||"0"));
+        const hot = todayPfx && Math.floor(num/100)===todayPfx;
+        return (hot?"<span style='color:var(--orange)'>":"<span>") + rt + "</span>";
+      }).join(", ");
+
+      tr.innerHTML = "<td>" + batchCell + "</td>"
+        + "<td>" + (routeDisplay||"—") + "</td>"
+        + "<td>" + r.made + "/" + r.total + "</td>"
+        + "<td class='req-cell " + (req===0?"zero":"nonzero") + "'>" + req + "</td>"
+        + "<td>" + (r.mull||"—") + "</td>"
+        + "<td>" + (r.temp||"—") + "</td>"
+        + "<td>" + (r.desc||"—") + "</td>"
+        + "<td>" + eta + "</td>";
+      tbody.appendChild(tr);
+    }
+
+    // ── Render today's rows ──────────────────────────────────────────────────
+    if(todayRows.length > 0){
+      todayRows.forEach(r => buildRow(r, true));
+    } else if(carryUnits > 0){
+      // Manual carryover — synthetic row
+      cum += upm > 0 ? carryUnits / upm : 0;
+      const tr = document.createElement("tr");
+      tr.innerHTML = "<td colspan='7' style='color:var(--muted);font-style:italic'>"
+        + "Carryover (" + carryUnits + " units) — manual entry</td>"
+        + "<td>" + timeOfDayFromProdMin(line, cum, SHIFT_START_MIN) + "</td>";
+      tbody.appendChild(tr);
+    }
+
+    // ── TOMORROW STARTS HERE divider ─────────────────────────────────────────
+    const divider = document.createElement("tr");
+    divider.className = "tomorrow-divider";
+    divider.innerHTML = "<td colspan='8'>――― TOMORROW STARTS HERE ―――</td>";
+    tbody.appendChild(divider);
+
+    // ── Render tomorrow's rows with optional 50% marker ─────────────────────
+    let nightTargetInserted = false;
+    let nightCumReq = 0;
+    for(const r of tmrwRows){
+      nightCumReq += r.required;
+      if(isPXSL && !nightTargetInserted && halfTarget && nightCumReq >= halfTarget){
+        nightTargetInserted = true;
+        const m = document.createElement("tr");
+        m.className = "night-target-row";
+        m.innerHTML = "<td colspan='8'>―― NIGHT SHIFT TARGET ― "
+          + halfTarget + " units (50% of " + tmrwRequired + " scheduled) ――</td>";
+        tbody.appendChild(m);
+      }
+      buildRow(r, false);
+    }
+
+    if(tmrwRows.length === 0){
+      const tr = document.createElement("tr");
+      tr.innerHTML = "<td colspan='8' style='color:var(--muted)'>No open rows for " + secKey + " in tomorrow’s schedule.</td>";
+      tbody.appendChild(tr);
+    }
+
+    // ── Update KPIs ──────────────────────────────────────────────────────────
+    document.getElementById("p_totalReq").textContent   = todayRequired || (carryUnits > 0 ? carryUnits + " (carry)" : "0");
+    document.getElementById("pb_totalReq").textContent  = tmrwRequired;
+    document.getElementById("p_totalBuild").textContent = totalBuild;
+    document.getElementById("p_carry").textContent      = carryUnits || "0";
+    document.getElementById("p_finish").textContent     = timeOfDayFromProdMin(line, cum, SHIFT_START_MIN);
+    document.getElementById("p_highWork").textContent   = hwCount || "0";
+
+    if(isPXSL){
+      document.getElementById("p_nightTargetK").style.display = "";
+      document.getElementById("pb_target").textContent = halfTarget + " units";
+    } else {
+      document.getElementById("p_nightTargetK").style.display = "none";
+    }
+
+    if(delivCount > 0){
+      document.getElementById("p_delivK").style.display = "";
+      document.getElementById("p_delivCount").textContent = delivCount + " units";
+      document.getElementById("p_delivFinishK").style.display = "";
+      document.getElementById("p_delivFinish").textContent = delivFinishCum !== null
+        ? timeOfDayFromProdMin(line, delivFinishCum, SHIFT_START_MIN)
+        : "—";
+    } else {
+      document.getElementById("p_delivK").style.display = "none";
+      document.getElementById("p_delivFinishK").style.display = "none";
+    }
+
+    // Store for Teams copy
+    state.planSummary = {
+      line: line.label, cap: line.cap,
+      carryUnits, todayRequired, tmrwRequired, totalBuild,
+      projectedFinish: timeOfDayFromProdMin(line, cum, SHIFT_START_MIN),
+      delivCount, delivFinish: delivFinishCum !== null ? timeOfDayFromProdMin(line, delivFinishCum, SHIFT_START_MIN) : null,
+      hwCount, isPXSL, halfTarget
+    };
+
+    // Auto-update Teams preview
+    document.getElementById("planTeamsBox").textContent = buildPlanTeamsText();
+  }
+
+  function buildPlanTeamsText(){
+    const s = state.planSummary;
+    if(!s) return "Build plan first.";
+    const now = toHM(new Date());
+    const NL = "\n";
+    const SEP = "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501";
+    let txt = "End-of-Shift Plan \u2014 " + s.line + " \u2014 " + now + NL + NL
+      + "\u2501\u2501 SCHEDULE SUMMARY " + SEP + NL
+      + "Line:               " + s.line + NL
+      + "Capacity:           " + s.cap + " units/shift" + NL
+      + "Carryover:          " + s.carryUnits + " units" + NL
+      + "Today scheduled:    " + s.todayRequired + " units" + NL
+      + "Tomorrow scheduled: " + s.tmrwRequired + " units" + NL
+      + "Total build:        " + s.totalBuild + " units" + NL
+      + "Projected complete: " + s.projectedFinish + NL;
+    if(s.delivCount > 0){
+      txt += NL + "\u2501\u2501 DELIVERY " + SEP + NL
+        + "Delivery qty:       " + s.delivCount + " units" + NL
+        + "Delivery complete:  " + (s.delivFinish || "\u2014") + NL;
+    }
+    txt += NL + "\u2501\u2501 PRODUCTION NOTES " + SEP + NL
+      + "High work batches:  " + (s.hwCount || "0") + NL;
+    if(s.isPXSL && s.halfTarget){
+      txt += "Night shift target: " + s.halfTarget + " units (50% of tomorrow)" + NL;
+    }
+    return txt;
+  }
+
+  // ===== INIT =====
+  buildLineButtons();
+  syncHeader();
+  setTab("hour");
+
+})();
+</script>
+</body>
+</html>
